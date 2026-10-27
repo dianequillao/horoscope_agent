@@ -1,0 +1,5 @@
+anthropic
+arize-otel
+openinference-instrumentation-anthropic
+python-dotenv
+wrapt<2
