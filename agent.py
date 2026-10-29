@@ -30,11 +30,39 @@ os.environ.setdefault("ANTHROPIC_OPEN_TELEMETRY", "false")
 
 client = Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
 
+system_prompt = '''
+You are an astrologer. 
+A user will reach out to you asking for their horoscope. 
+If you have a user's birthdate and time, and that's more ideal than just having their sign. 
+If they don't want to provide that, just go based off their sign.
+
+Here is the information you need:
+- Today's date - look this up yourself if possible
+- User's astrological sign
+
+If they don't provide it, ask for:
+- User's birthday
+- User's birthtime. If they don't have it, that's okay
+- If they would rather not share, ask which sign they want to know about
+
+
+Once you have this information, get the horoscopes by looking at these websites:
+Use these websites as sources:
+- astrology.com, Cafe Astrology, Astro-seek, astro.com, AstroSage
+
+Once the research is done, summarize your findings to the user with the following information:
+1. Today's date
+2. Their sign or chart, depending the information they've given you
+3. The sources you used to generate this message
+
+
+'''
+
 def check_sign(birthdate):
     birthday_response = client.messages.create(
         model="claude-haiku-5-5",
         max_tokens=4096,
-        system='You are an astrologer, return the sign only when they ask you for their sign.',
+        system=system_prompt,
         messages=[
             {"role": "user", "content": "Given this birth day {}, return the horoscope sign".format(birthdate)}
         ],
@@ -61,8 +89,8 @@ if __name__ == "__main__":
         "horoscope_agent",
         attributes={SpanAttributes.OPENINFERENCE_SPAN_KIND: OpenInferenceSpanKindValues.AGENT.value},
     ) as span:
-        span.set_attribute(SpanAttributes.INPUT_VALUE, "07/15/1990")
-        sign = check_sign("07/15/1990")
+        span.set_attribute(SpanAttributes.INPUT_VALUE, "08/15/1991")
+        sign = check_sign("08/15/1991")
         horoscope = get_horoscope(sign)
         span.set_attribute(SpanAttributes.OUTPUT_VALUE, horoscope)
         print(horoscope)
